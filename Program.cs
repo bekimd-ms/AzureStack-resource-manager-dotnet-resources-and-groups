@@ -17,7 +17,7 @@ namespace ConsoleApplication
         {
             var tenantId = Environment.GetEnvironmentVariable("AAD_TENANT_ID");
             var clientId = Environment.GetEnvironmentVariable("APP_CLIENT_ID");
-            var secret = Environment.GetEnvironmentVariable("APP_SECRET");
+            var secret = Environment.GetEnvironmentVariable("APP_CLIENT_SECRET");
             var subscriptionId = Environment.GetEnvironmentVariable("AZURESTACK_SUBSCRIPTION_ID");
             var azureStackResourceId = Environment.GetEnvironmentVariable("AZURESTACK_RESOURCE_ID");
             var azureStackARMUri  = Environment.GetEnvironmentVariable("AZURESTACK_ARM_URI");

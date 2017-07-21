@@ -41,14 +41,22 @@ using the Azure .NET SDK.
     [Azure CLI](https://azure.microsoft.com/documentation/articles/resource-group-authenticate-service-principal-cli/),
     [PowerShell](https://azure.microsoft.com/documentation/articles/resource-group-authenticate-service-principal/)
     or [the portal](https://azure.microsoft.com/documentation/articles/resource-group-create-service-principal-portal/).
+   In Azure Stack give Contributor permissions to the subscription where the resources are stored.  
+
+1. Obtain the management endpoint URI for Azure Stack instance you are targeting from the service administrator. For example, if you are running your own ASDK deployment the URI will be in the form https://management.local.azurestack.external 
+
+1. Find the AAD resource ID of the Azure Stack instance you are targeting. For example, if you are running your own ASDK deployment, you issue a request to https://management.local.azurestack.external/metadata/endpoints?api-version=2015-01-01. Then copy the value of the first element of the audiences property in the JSON response. 
 
 1. Export these environment variables using your subscription id and the tenant id, client id and client secret from the service principle that you created. 
 
     ```
-    export AZURE_TENANT_ID={your tenant id}
-    export AZURE_CLIENT_ID={your client id}
-    export AZURE_CLIENT_SECRET={your client secret}
-    export AZURE_SUBSCRIPTION_ID={your subscription id}
+    export AAD_TENANT_ID={your tenant id}
+    export AAD_CLIENT_ID={your client id}
+    export AAD_CLIENT_SECRET={your client secret}
+    export AZURESTACK_SUBSCRIPTION_ID={your subscription id}
+    export AZURESTACK_RESOURCE_ID={the value of audience URI retrieved in previous step}
+    export AZURESTACK_ARM_URI={the management endpoint URI}
+    export AZURESTACK_LOCATION={the location (region) of your Azure Stack deployment ");
     ```
 
 1. Run the sample.
@@ -65,8 +73,13 @@ It starts by setting up a ResourceManagementClient object using your subscriptio
 
 ```csharp
 // Build the service credentials and Azure Resource Manager clients
-var serviceCreds = await ApplicationTokenProvider.LoginSilentAsync(tenantId, clientId, secret);
-var resourceClient = new ResourceManagementClient(serviceCreds);
+var settings = new ActiveDirectoryServiceSettings();
+settings.AuthenticationEndpoint = new Uri("https://login.windows.net/");
+settings.TokenAudience = new Uri( azureStackResourceId );
+settings.ValidateAuthority = true;
+var serviceCreds = await ApplicationTokenProvider.LoginSilentAsync(tenantId, clientId, secret, settings);
+var resourceClient= new ResourceManagementClient(serviceCreds);
+resourceClient.BaseUri = new Uri( azureStackARMUri );
 resourceClient.SubscriptionId = subscriptionId;
 ```
 
